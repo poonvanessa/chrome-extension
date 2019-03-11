@@ -11,34 +11,55 @@ const kButtons = [
   {
     'text': 'Clear Cookies',
     'color': '#3aa757',
-    'action': 'clearCookies()',
+    'action': 'clearCookies',
     'name': 'byeCookies',
   },
-  // {
-  //   'text': 'Bet rpat03',
-  //   'color': '#e8453c',
-  // },
+  {
+    'text': 'Greeting!',
+    'color': '#e8453c',
+    'action': 'sayHi',
+    'name': 'greeting',
+  },
   // {
   //   'text': 'Check Lunch Menu',
   //   'color': '#f9bb2d',
   // },
-  // {
-  //   'text': 'Clear Cookies',
-  //   'color': '#4688f1',
-  // }
+  {
+    'text': 'Bake a new Cookie',
+    'color': '#4688f1',
+    'action': 'addCookie',
+  }
 ]
 function constructOptions(kButtons) {
   for (let item of kButtons) {
     let button = document.createElement('button');
     button.style.backgroundColor = item.color;
     button.text = item.text;
-    button.name = item.name
+    button.name = item.name;
     button.addEventListener('click', function() {
        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.executeScript(
             tabs[0].id,
-            // {code: 'alert("'+button.text+'");'});  // ok
-            {code: 'clearCookies();'});               // failed -,-
+            // {code: 'alert("'+item.text+'");'});  // ok
+            {code: 'var x = "' + item.action + '"; x'}, // taking x as arguments of the function call back
+            function(functionName){   // todo: make it dynamic upon functions
+              console.log(functionName);  // -> ["clearCookies"] 
+              
+              switch(functionName[0]) {
+                case 'clearCookies':
+                  clearCookies();
+                  break;
+                case 'sayHi':
+                  sayHi();
+                  break;
+                case 'addCookie': 
+                  addCookie('taste', 'chocolate');
+                  break;
+                default:
+                  console.log('no such function, ' + functionName);
+              }
+            }
+          );
       });
     });
     page.appendChild(button);
@@ -48,7 +69,6 @@ function constructOptions(kButtons) {
 constructOptions(kButtons);
 
 function clearCookies() {
-  alert('hello');
   var cookies = document.cookie.split(";");
 
   for (var i = 0; i < cookies.length; i++) {
@@ -58,9 +78,18 @@ function clearCookies() {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }
 
-  alert('You have no cookie now :D');
+  console.log('You have no cookie now :D');
 }
 
 function checkLunch() {
   window.location.href = 'https://officerakuten.sharepoint.com/sites/GlobalPortal/SitePages/top.aspx';
+}
+
+function sayHi() {
+  alert('Hello World');
+}
+
+function addCookie(cookieName, cookieValue) {
+  console.log('add Cookie: ' + cookieName + "=" + cookieValue);
+  document.cookie = cookieName + "=" + cookieValue;
 }
