@@ -27,9 +27,12 @@ const kButtons = [
   {
     'text': 'Bake a new Cookie',
     'color': '#4688f1',
-    'action': 'addCookie',
+    'action': 'setCookie',
+    'name': 'add cookies',
   }
 ]
+const cookieName = 'taste';
+
 function constructOptions(kButtons) {
   for (let item of kButtons) {
     let button = document.createElement('button');
@@ -43,7 +46,7 @@ function constructOptions(kButtons) {
             // {code: 'alert("'+item.text+'");'});  // ok
             {code: 'var x = "' + item.action + '"; x'}, // taking x as arguments of the function call back
             function(functionName){   // todo: make it dynamic upon functions
-              console.log(functionName);  // -> ["clearCookies"] 
+              // console.log(functionName);  // -> ["clearCookies"] 
               
               switch(functionName[0]) {
                 case 'clearCookies':
@@ -52,8 +55,8 @@ function constructOptions(kButtons) {
                 case 'sayHi':
                   sayHi();
                   break;
-                case 'addCookie': 
-                  addCookie('taste', 'chocolate');
+                case 'setCookie': 
+                  setCookie(cookieName, 'chocolate', 30); // the cookies is set but didn't show it in the console
                   break;
                 default:
                   console.log('no such function, ' + functionName);
@@ -86,10 +89,40 @@ function checkLunch() {
 }
 
 function sayHi() {
-  alert('Hello World');
+  var cookie = getCookie(cookieName);
+  alert('Hello World ' + cookie + '!');
 }
 
-function addCookie(cookieName, cookieValue) {
-  console.log('add Cookie: ' + cookieName + "=" + cookieValue);
-  document.cookie = cookieName + "=" + cookieValue;
+function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  var expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for(var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+// function checkCookie() {
+//   var user = getCookie("username");
+//   if (user != "") {
+//     alert("Welcome again " + user);
+//   } else {
+//     user = prompt("Please enter your name:", "");
+//     if (user != "" && user != null) {
+//       setCookie("username", user, 365);
+//     }
+//   }
+// }
