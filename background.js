@@ -12,7 +12,7 @@ chrome.runtime.onInstalled.addListener(function() {
     chrome.declarativeContent.onPageChanged.addRules([{
       conditions: [new chrome.declarativeContent.PageStateMatcher({
         // pageUrl: {hostEquals: 'keiba.rakuten.co.jp'},
-        pageUrl: {hostEquals: 'developer.chrome.com'},
+        pageUrl: {hostEquals: 'developer.chrome.com'},  // todo 
       })
       ],
           actions: [new chrome.declarativeContent.ShowPageAction()]

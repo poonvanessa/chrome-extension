@@ -6,46 +6,105 @@
 
 let page = document.getElementById('buttonDiv');
 
-const kButtonColors = [document.body.style.backgroundColor, '#3aa757', '#e8453c', '#f9bb2d', '#4688f1'];
 const kButtons = [
   {
-    'text' : 'Clear Cookies',
+    'text' : 'Login on Local',
     'name' : 'clearCookies',
+    'class' : 'btn btn-info block',
   },
   {
-    'text' : 'Home page',
-    'name' : 'goHome',
+    'text' : 'Check Lunch',
+    'name' : 'checkDinner',
+    'class' : 'btn btn-info block',
   }
 ]
-const redirectUrl = 'https://www.google.com';
+const rapMenuUrl = 'https://getbootstrap.com/docs/4.0/layout/grid/';  // todo
+const setBetUserUrl = 'https://www.google.com'; // todo
+const cookieName = '_ga'; // todo
+var redirectUrl = '';
 
 function constructOptions(kButtons) {
   for (let item of kButtons) {
     let button = document.createElement('button');
     button.textContent = item.text;
     button.name = item.name;
+    button.className  = item.class;
     button.addEventListener('click', function() {
+      switch (button.name) 
+      {
+        case 'clearCookies':
+          clearCookies();
+          break;
+        case 'checkDinner':
+          checkDinner();
+          break;
+        default:
+          console.log('no such button');
+          break;
+      }
       
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        var tab = tabs[0];
-        var url = new URL(tab.url);
-        var domain = url.hostname;
-
-        chrome.cookies.getAll({domain: domain}, function (cookies){
-          for(var i=0;i<cookies.length;i++){
-            // console.log('url: '+ url, 'name: ' + cookies[i].name);
-            chrome.cookies.remove({url:url.toString(), name:cookies[i].name});
-          }
-        });
-
-        chrome.tabs.executeScript(
-            tabs[0].id,
-            {code: 'window.location.href = "' + redirectUrl + '";'}
-          );
-      });
     });
     page.appendChild(button);
   }
 }
-
 constructOptions(kButtons);
+
+function clearCookies() 
+{
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    var tab = tabs[0];
+    var url = new URL(tab.url);
+    redirectUrl = url;
+    
+    chrome.tabs.executeScript(
+      tab[0],
+      {
+        code: 'performance.getEntriesByType("resource").map(e => e.name)',
+      }, data => {
+        if (chrome.runtime.lastError || !data || !data[0]) return;
+        const urls = data[0].map(url => url.split(/[#?]/)[0]);
+        const uniqueUrls = [...new Set(urls).values()].filter(Boolean);
+        Promise.all(
+          uniqueUrls.map(url =>
+            new Promise(resolve => {
+              chrome.cookies.getAll({url}, resolve);
+            })
+          )
+        ).then(results => {
+          // convert the array of arrays into a deduplicated flat array of cookies
+          const cookies = [
+            ...new Map(
+              [].concat(...results)
+                .map(c => [JSON.stringify(c), c])
+            ).values()
+          ];
+      
+          // do something with the cookies here
+          cookies.forEach(function (cookie) {
+            if (cookie.name === cookieName) {
+              chrome.cookies.remove({url:url.toString(), name:cookie.name});
+              // console.log(cookie, url.toString());
+            }
+          })
+          // console.log(uniqueUrls, cookies);
+        });
+      });   
+
+    chrome.tabs.executeScript({
+      code: 'window.location.href = "' + setBetUserUrl + '"; window.location.href = "' + redirectUrl + '";'
+    });
+  });
+}
+
+function checkDinner() {
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    var tab = tabs[0];
+    var url = new URL(tab.url);
+    redirectUrl = url;
+    
+    chrome.tabs.executeScript(
+      tab[0],
+      {code: 'window.location.href = "' + rapMenuUrl + '";'}
+    );
+  });
+}
