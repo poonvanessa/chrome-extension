@@ -5,7 +5,14 @@
 'use strict';
 
 let page = document.getElementById('buttonDiv');
+let profile = document.getElementById('profile');
 
+const kImages = [
+  'jiji.jpg_large',
+  'jiji2.jpg_large',
+  'jiji3.jpg_large',
+  'jiji4.jpg_large',
+]
 const kButtons = [
     {
         'text': 'Login as rpat03',
@@ -13,13 +20,13 @@ const kButtons = [
         'class': 'btn btn-warning block',
     },
     {
-        'text': 'Check Lunch',
-        'name': 'checkMenu',
-        'class': 'btn btn-warning block',
-    },
-    {
       'text': 'Clear Cookies',
       'name': 'clearCookies',
+      'class': 'btn btn-warning block',
+    },
+    {
+      'text': 'Check Lunch',
+      'name': 'checkMenu',
       'class': 'btn btn-warning block',
     }
 ]
@@ -52,7 +59,14 @@ function constructOptions(kButtons) {
     }
 }
 
-constructOptions(kButtons);
+function constructProfileImage(kImages) {
+    let index = Math.floor(Math.random() * kImages.length);
+    let img = document.createElement('IMG');
+    console.log(kImages[index]);
+    img.setAttribute("src", 'images/profile/' + kImages[index]);
+    img.setAttribute("class", 'img-responsive');
+    profile.appendChild(img);
+}
 
 function loginRpat03Local() {
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
@@ -147,3 +161,7 @@ function clearCookies() {
         });
 });
 }
+
+
+constructProfileImage(kImages);
+constructOptions(kButtons);
