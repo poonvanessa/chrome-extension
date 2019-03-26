@@ -4,9 +4,6 @@
 
 'use strict';
 
-let page = document.getElementById('buttonDiv');
-let profile = document.getElementById('profile');
-
 const kImages = [
   'jiji.jpg_large',
   'jiji2.jpg_large',
@@ -35,7 +32,9 @@ const setBetUserUrl = 'https://local.bet.keiba.rakuten.co.jp/sample/samples/logi
 const cookieName = 'Rz'; // todo
 var redirectUrl = '';
 
-function constructOptions(kButtons) {
+function constructOptions(elementId, kButtons) {
+  let page = document.getElementById(elementId);
+
     for (let item of kButtons) {
         let button = document.createElement('button');
         button.textContent = item.text;
@@ -59,7 +58,9 @@ function constructOptions(kButtons) {
     }
 }
 
-function constructProfileImage(kImages) {
+function constructProfileImage(elementId, kImages) {
+  let profile = document.getElementById(elementId);
+
     let index = Math.floor(Math.random() * kImages.length);
     let img = document.createElement('IMG');
     console.log(kImages[index]);
@@ -162,6 +163,36 @@ function clearCookies() {
 });
 }
 
+function constructCountDown(elementId) {
+  var now = new Date();
+  const asakai = [1];
+  const normalWorkDay = [2,3,4,5];
+  if (normalWorkDay.includes(now.getDay())) {
+    countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 30));
+  } else if (asakai.includes(now.getDay())) {
+    countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30));
+  }
+}
 
-constructProfileImage(kImages);
-constructOptions(kButtons);
+function constructTodayBlock(elementId) {
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth() + 1; //January is 0!
+
+  var yyyy = today.getFullYear();
+  if (dd < 10) {
+    dd = '0' + dd;
+  } 
+  if (mm < 10) {
+    mm = '0' + mm;
+  } 
+  var today = dd + '/' + mm + '/' + yyyy +' ( ' + weekDays[today.getDay()] + ' )';
+  document.getElementById(elementId).innerHTML = today;
+}
+
+
+constructTodayBlock('today');
+constructCountDown('countDown');
+constructProfileImage('profile', kImages);
+constructOptions('buttonDiv', kButtons);
