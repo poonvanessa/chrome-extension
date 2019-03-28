@@ -13,18 +13,18 @@ const kImages = [
 const kButtons = [
     {
         'text': 'Login as rpat03',
-        'name': 'loginRpat03Local',
+        'action': 'loginRpat03Local',
         'class': 'btn btn-warning block',
     },
     {
-      'text': 'Clear Cookies',
-      'name': 'clearCookies',
-      'class': 'btn btn-warning block',
+        'text': 'Clear Cookies',
+        'action': 'clearCookies',
+        'class': 'btn btn-warning block',
     },
     {
-      'text': 'Check Lunch',
-      'name': 'checkMenu',
-      'class': 'btn btn-warning block',
+        'text': 'Check Lunch',
+        'action': 'checkMenu',
+        'class': 'btn btn-warning block',
     }
 ]
 const rapMenuUrl = 'https://officerakuten.sharepoint.com/sites/GlobalPortal/SitePages/top.aspx';  // todo
@@ -38,21 +38,9 @@ function constructOptions(elementId, kButtons) {
     for (let item of kButtons) {
         let button = document.createElement('button');
         button.textContent = item.text;
-        button.name = item.name;
         button.className = item.class;
         button.addEventListener('click', function () {
-            switch (button.name) {
-                case 'clearCookies':
-                    clearCookies();
-                    break;
-                case 'checkMenu':
-                    checkMenu();
-                    break;
-                default:
-                    console.log('no such button');
-                    break;
-            }
-
+            window[button.action]();
         });
         page.appendChild(button);
     }
@@ -69,12 +57,39 @@ function constructProfileImage(elementId, kImages) {
     profile.appendChild(img);
 }
 
+function constructCountDown(elementId) {
+    var now = new Date();
+    const asakai = [1];
+    const normalWorkDay = [2,3,4,5];
+    if (normalWorkDay.includes(now.getDay())) {
+      countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 30));
+    } else if (asakai.includes(now.getDay())) {
+      countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30));
+    }
+  }
+  
+function constructTodayBlock(elementId) {
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth() + 1; //January is 0!
+
+var yyyy = today.getFullYear();
+if (dd < 10) {
+    dd = '0' + dd;
+} 
+if (mm < 10) {
+    mm = '0' + mm;
+} 
+var today = dd + '/' + mm + '/' + yyyy +' ( ' + weekDays[today.getDay()] + ' )';
+document.getElementById(elementId).innerHTML = today;
+}
+
 function loginRpat03Local() {
     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         var tab = tabs[0];
         var url = new URL(tab.url);
-        // redirectUrl = url;
-        redirectUrl = 'https://local.my.keiba.rakuten.co.jp/contribute/premium_exchange';
+        redirectUrl = url;
 
         chrome.tabs.executeScript(
             tab[0],
@@ -162,35 +177,6 @@ function clearCookies() {
         });
 });
 }
-
-function constructCountDown(elementId) {
-  var now = new Date();
-  const asakai = [1];
-  const normalWorkDay = [2,3,4,5];
-  if (normalWorkDay.includes(now.getDay())) {
-    countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 30));
-  } else if (asakai.includes(now.getDay())) {
-    countDown(elementId, new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30));
-  }
-}
-
-function constructTodayBlock(elementId) {
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
-  var today = new Date();
-  var dd = today.getDate();
-  var mm = today.getMonth() + 1; //January is 0!
-
-  var yyyy = today.getFullYear();
-  if (dd < 10) {
-    dd = '0' + dd;
-  } 
-  if (mm < 10) {
-    mm = '0' + mm;
-  } 
-  var today = dd + '/' + mm + '/' + yyyy +' ( ' + weekDays[today.getDay()] + ' )';
-  document.getElementById(elementId).innerHTML = today;
-}
-
 
 constructTodayBlock('today');
 constructCountDown('countDown');
